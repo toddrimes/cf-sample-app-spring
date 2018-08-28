@@ -1,7 +1,10 @@
 @Grab("thymeleaf-spring4")
+@Grab('groovy-sql')
+// @Grab(group='org.postgresql', module='postgresql', version='9.4-1205-jdbc42')
 
 import org.springframework.core.env.*
 import com.fasterxml.jackson.databind.*
+import groovy.sql.Sql
 
 @Controller
 class Application {
@@ -16,6 +19,12 @@ class Application {
 	@Value('${VCAP_SERVICES:{}}')
 	private String services;
 
+	def dbUrl      = "jdbc:postgresql://stampy.db.elephantsql.com:5432/tvttqqbo"
+	def dbUser     = "tvttqqbo"
+	def dbPassword = "X0kh2qDEon9S95yPGIQmgssqUomBA_Dv"
+	def dbDriver   = "org.postgresql.Driver"
+
+	def sql = Sql.newInstance(dbUrl, dbUser, dbPassword, dbDriver)
 
 	@RequestMapping("/")
 	public String index(Model model) {
@@ -34,5 +43,29 @@ class Application {
 		}
 		return "index"
 	}
+
+  @GetMapping("/message")
+  public @ResponseBody ResponseEntity<String> getMessage() {
+    return new ResponseEntity<String>("Response from GET", HttpStatus.OK);
+  }
+  @GetMapping("/message/{id}")
+  public @ResponseBody ResponseEntity<String> getMessageById(@PathVariable String id){
+    return new ResponseEntity<String>("Response from GET with id " +id,HttpStatus.OK);   }
+  @PostMapping("/message")
+  public @ResponseBody ResponseEntity<String> postMessage() {
+    return new ResponseEntity<String>("Response from POST method", HttpStatus.OK);
+  }
+  @PutMapping("/message")
+  public @ResponseBody ResponseEntity<String> putMessage() {
+    return new ResponseEntity<String>("Response from PUT method", HttpStatus.OK);
+  }
+  @DeleteMapping("/message")
+  public @ResponseBody ResponseEntity<String> deleteMessage() {
+    return new ResponseEntity<String>("Response from DELETE method", HttpStatus.OK); 
+  }
+  @PatchMapping("/message")
+  public @ResponseBody ResponseEntity<String> patchMessage() {
+    return new ResponseEntity<String>("Response from PATCH method", HttpStatus.OK); 
+  }
 
 }
