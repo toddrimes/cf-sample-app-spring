@@ -1,10 +1,14 @@
+import groovy.json.JsonOutput
 @Grab("thymeleaf-spring4")
 @Grab('groovy-sql')
+@Grab('groovy-json')
+//@Grab("org.codehaus.groovy:groovy-json")
 // @Grab(group='org.postgresql', module='postgresql', version='9.4-1205-jdbc42')
 
 import org.springframework.core.env.*
 import com.fasterxml.jackson.databind.*
 import groovy.sql.Sql
+import groovy.json.*
 
 @Controller
 class Application {
@@ -26,7 +30,7 @@ class Application {
 
 	def sql = Sql.newInstance(dbUrl, dbUser, dbPassword, dbDriver)
 
-	@RequestMapping("/")
+	@RequestMapping("/services")
 	public String index(Model model) {
 		model.addAttribute("cfapp", json.readValue(application, LinkedHashMap.class))
 		try {
@@ -46,11 +50,20 @@ class Application {
 
   @GetMapping("/message")
   public @ResponseBody ResponseEntity<String> getMessage() {
-    return new ResponseEntity<String>("Response from GET", HttpStatus.OK);
+	def rows = sql.rows("select * from ar_messages where recipient = 'todd@rimesmedia.com'")
+	// def output = rows.join('\n')
+	def output = new JsonBuilder(messages:rows).toPrettyString()
+
+    return new ResponseEntity<String>(output, HttpStatus.OK);
   }
-  @GetMapping("/message/{id}")
-  public @ResponseBody ResponseEntity<String> getMessageById(@PathVariable String id){
-    return new ResponseEntity<String>("Response from GET with id " +id,HttpStatus.OK);   }
+    @GetMapping("/")
+    public @ResponseBody ResponseEntity<String> getHome() {
+        return new ResponseEntity<String>("Hello World!",HttpStatus.OK);
+    }
+    @GetMapping("/message/{id}")
+    public @ResponseBody ResponseEntity<String> getMessageById(@PathVariable String id) {
+        return new ResponseEntity<String>("Response from GET with id " +id,HttpStatus.OK);
+    }
   @PostMapping("/message")
   public @ResponseBody ResponseEntity<String> postMessage() {
     return new ResponseEntity<String>("Response from POST method", HttpStatus.OK);
